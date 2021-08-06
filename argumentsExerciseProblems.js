@@ -26,15 +26,15 @@ function sum2(...args) {
 // console.log(sum(1, 2, 3, 4))// === 10;
 // console.log(sum(1, 2, 3, 4, 5))// === 15;
 
-Function.prototype.myBind1 = function (context, ...args1) {
+Function.prototype.myBind1 = function (context, ...bindTime) {
     let that = this;
-    return function (...args2) {
-          // return that.apply(context, args1.concat(args2));
-      return that.apply(context, [...args1, ...args2]);
+    return function (...callTime) {
+        //   return that.apply(context, bindTime.concat(callTime));
+      return that.apply(context, [...bindTime, ...callTime]);
     }
  }
 
-Function.prototype.myBind2 = function (context) {
+Function.prototype.myBind2 = function () {
   // arguments[0] = context
   let prevArgs = [];
   for(arg of arguments) {
@@ -51,12 +51,10 @@ Function.prototype.myBind2 = function (context) {
   }
 }
 
-
-
-Function.prototype.myBind = function (context, ...args1) {
-  let prevArgs = Array.from(arguments).slice(1);
+Function.prototype.myBind = function () {
+  let prevArgs = Array.from(arguments);
   let that = this;
-  return function (...args2) {
+  return function () {
     return that.apply(prevArgs[0], prevArgs.slice(1).concat(Array.from(arguments)));
   }
 }
@@ -128,10 +126,19 @@ function curriedSum (amount) {
   }
 }
 
-
-function sumThree(num1, num2, num3) {
-  return num1 + num2 + num3;
+function curriedSum (amount) {
+  let arr = [];
+  return function _curry(num) {
+      arr.push(num);
+      if (arr.length === amount) return arr.reduce((acc, ele) => acc + ele);
+      return _curry;
+  }
 }
+
+
+// function sumThree(num1, num2, num3) {
+//   return num1 + num2 + num3;
+// }
 
 // console.log(sumThree(4, 20, 6)); // == 30
 
@@ -144,11 +151,47 @@ function sumThree(num1, num2, num3) {
 // or more briefly:
 // sumThree.curry(3)(4)(20)(6); // == 30
 
-const sum = curriedSum(4);
-console.log(sum(5)(30)(20)(1));
+// const sum = curriedSum(4);
+// console.log(sum(5)(30)(20)(1));
 
 // const sum = curriedSum(4);
 // sum(5);
 // sum(6);
 // sum(7);
 // console.log(sum(8));
+
+Function.prototype.curry = function (numArgs) {
+    let arr = [];
+    let that = this;
+    return function _curry(num) {
+        arr.push(num);
+        if (arr.length === numArgs) {
+            return that.apply(that, arr)
+        };
+        return _curry;
+    }
+}
+Function.prototype.curry = function (numArgs) {
+    let arr = [];
+    let that = this;
+    return function _curry(num) {
+        arr.push(num);
+        if (arr.length === numArgs) {
+            return that.call(that, ...arr)
+        };
+        return _curry;
+    }
+}
+
+function sum(a,b,c,d) {
+    return a + b + c + d;
+}
+
+// let a = sum.curry(4);
+// console.log(a(1)(6)(5)(4));
+
+
+ 
+    
+  
+  
