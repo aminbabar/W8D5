@@ -26,12 +26,40 @@ function sum2(...args) {
 // console.log(sum(1, 2, 3, 4))// === 10;
 // console.log(sum(1, 2, 3, 4, 5))// === 15;
 
-Function.prototype.myBind = function (context, ...args1) {
+Function.prototype.myBind1 = function (context, ...args1) {
     let that = this;
     return function (...args2) {
-          return that.apply(context, args1.concat(args2));
+          // return that.apply(context, args1.concat(args2));
+      return that.apply(context, [...args1, ...args2]);
     }
  }
+
+Function.prototype.myBind2 = function (context) {
+  // arguments[0] = context
+  let prevArgs = [];
+  for(arg of arguments) {
+    prevArgs.push(arg);
+  }
+  let that = this;
+  return function () {
+    // arguments
+    let currArgs = [];
+    for (arg of arguments) {
+      currArgs.push(arg);
+    }
+    return that.apply(prevArgs[0], prevArgs.slice(1).concat(currArgs));
+  }
+}
+
+
+
+Function.prototype.myBind = function (context, ...args1) {
+  let prevArgs = Array.from(arguments).slice(1);
+  let that = this;
+  return function (...args2) {
+    return that.apply(prevArgs[0], prevArgs.slice(1).concat(Array.from(arguments)));
+  }
+}
 
 
 class Cat {
@@ -51,35 +79,76 @@ class Cat {
     }
   }
   
-  const markov = new Cat("Markov");
-  const pavlov = new Dog("Pavlov");
+  // const markov = new Cat("Markov");
+  // const pavlov = new Dog("Pavlov");
   
-  markov.says("meow", "Ned");
-  // Markov says meow to Ned!
-  // true
+  // markov.says("meow", "Ned");
+  // // Markov says meow to Ned!
+  // // true
   
-  // bind time args are "meow" and "Kush", no call time args
-  markov.says.myBind(pavlov, "meow", "Kush")();
-  // Pavlov says meow to Kush!
-  // true
+  // // bind time args are "meow" and "Kush", no call time args
+  // markov.says.myBind(pavlov, "meow", "Kush")();
+  // // Pavlov says meow to Kush!
+  // // true
   
-  // no bind time args (other than context), call time args are "meow" and "a tree"
-  markov.says.myBind(pavlov)("meow", "a tree");
-  // Pavlov says meow to a tree!
-  // true
+  // // no bind time args (other than context), call time args are "meow" and "a tree"
+  // markov.says.myBind(pavlov)("meow", "a tree");
+  // // Pavlov says meow to a tree!
+  // // true
   
-  // bind time arg is "meow", call time arg is "Markov"
-  markov.says.myBind(pavlov, "meow")("Markov");
-  // Pavlov says meow to Markov!
-  // true
+  // // bind time arg is "meow", call time arg is "Markov"
+  // markov.says.myBind(pavlov, "meow")("Markov");
+  // // Pavlov says meow to Markov!
+  // // true
   
-  // no bind time args (other than context), call time args are "meow" and "me"
-  const notMarkovSays = markov.says.myBind(pavlov);
-  notMarkovSays("meow", "me");
-  // Pavlov says meow to me!
-  // true
+  // // no bind time args (other than context), call time args are "meow" and "me"
+  // const notMarkovSays = markov.says.myBind(pavlov);
+  // notMarkovSays("meow", "me");
+  // // Pavlov says meow to me!
+  // // true
 
 
  //      func.myBind
  // this  ^
  
+
+
+
+ ////////////////////////////////////////////////////////////////////////////////
+
+
+
+function curriedSum (amount) {
+  let arr = [];
+  return function _curry(num) {
+      arr.push(num);
+      amount -= 1;
+      if (!amount) return arr.reduce((acc, ele) => acc + ele);
+      return _curry;
+  }
+}
+
+
+function sumThree(num1, num2, num3) {
+  return num1 + num2 + num3;
+}
+
+// console.log(sumThree(4, 20, 6)); // == 30
+
+// you'll write `Function#curry`!
+// let f1 = sumThree.curry(3); // tells `f1` to wait until 3 arguments are given before running `sumThree`
+// f1 = f1(4); // [Function]
+// f1 = f1(20); // [Function]
+// f1 = f1(6); // = 30
+
+// or more briefly:
+// sumThree.curry(3)(4)(20)(6); // == 30
+
+const sum = curriedSum(4);
+console.log(sum(5)(30)(20)(1));
+
+// const sum = curriedSum(4);
+// sum(5);
+// sum(6);
+// sum(7);
+// console.log(sum(8));
